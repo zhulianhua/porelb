@@ -1,30 +1,26 @@
-all:  simgpu testpre
-#APP
+all:  porelb.x preprocess.x postprocess.x
 
-CC = gcc
-INCLUDE = .
-CFLAGS = -g -Wall
-#CFLAGS = -Wall -O1
+CC = mpiicc
+INCLUDE = /opt/tecplot/include
+CFLAGS = -O3 -xHost -std=c99 -g
 
-APP: testpre
+preprocess.x: preprocess.c
+	$(CC) $(CFLAGS) -o  $@  $^
 
-testpre: testpre.o  preprocess.o lb.o
-	$(CC) -I$(INCLUDE) $(CFLAGS) -o  $@  $^
+porelb.x: porelb.o
+	$(CC) $(CFLAGS) -o $@ $<
 
-testpre.o: testpre.c 
-	$(CC) -I$(INCLUDE) $(CFLAGS) -c  $<
-
-preprocess.o: preprocess.c
-	$(CC) -I$(INCLUDE) $(CFLAGS) -c $<
+porelb.o: porelb.c 
+	$(CC)  $(CFLAGS) -c $<
 
 lb.o: lb.c
-	$(CC) -I$(INCLUDE) $(CFLAGS) -c $<
+	$(CC)  $(CFLAGS) -c $<
+
+postprocess.x: postprocess.c  /opt/tecplot/lib/tecio64.a
+	$(CC) -I$(INCLUDE) $(CFLAGS) -o  $@  $^
 
 touch:
 	touch *.c
 
-simgpu: simgpumain.cu simgpu.cu lb.o
-	#nvcc  -o  simgpu simgpumain.cu lb.o  /opt/tecplot/lib/tecio64.a -I /opt/tecplot/include  -arch=sm_13 
-	nvcc  -o  simgpu simgpumain.cu lb.o  /opt/tecplot/lib/tecio64.a -I /opt/tecplot/include # -arch=sm_13 
 clean:
-	rm *.o testpre
+	rm *.o  *.x

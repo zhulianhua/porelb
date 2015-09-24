@@ -2,9 +2,11 @@
 #define __PREPROCESS_H_
 
 
-#include "node.h"
+#include "porelb.h"
+#include "lb.h"
 
-#define GID(z,y,x) (((z*ny_+y)*nx_ + x))
+#define GID_(z,y,x) (((z*ny_+y)*nx_ + x))
+
 
 typedef struct {
     int num_node;  //num. of fluids nodes

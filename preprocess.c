@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "mytype.h"
-#include "node.h"
 #include "preprocess.h"
+#include "porelb.h"
+
 
 void init_v_desc(V_DESC *v_desc_, int num_p_, int num_node_)
 {
@@ -74,12 +74,14 @@ V_DESC build_V(unsigned short num_p_, int nx_, int ny_, int nz_, char* flag_file
     for(z=0; z<nz_; z++)
         for(y=0; y<ny_; y++)
             for(x=0; x<nx_; x++){
-                k = GID(z, y, x);
-                if(flag[k] == 0){ //fluid nodes
+                k = GID_(z, y, x);
+                if(flag[k] == 1){ //fluid nodes
                     X_to_n[k] = num_node;   //save the index from X to  global fluid node id
                     num_node++;
                 }
             }
+
+    printf("num_nodes = %d\n", num_node);
 
     v_desc.nx = nx_;
     v_desc.ny = ny_;
@@ -97,8 +99,8 @@ V_DESC build_V(unsigned short num_p_, int nx_, int ny_, int nz_, char* flag_file
     for(z=0; z<nz_; z++)
         for(y=0; y<ny_; y++)
             for(x=0; x<nx_; x++){
-                k = GID(z, y, x);
-                if(flag[k] == 0){ //fluid nodes
+                k = GID_(z, y, x);
+                if(flag[k] == 1){ //fluid nodes
                     index_node_tmp.x = x;
                     index_node_tmp.y = y;
                     index_node_tmp.z = z;
@@ -122,8 +124,8 @@ V_DESC build_V(unsigned short num_p_, int nx_, int ny_, int nz_, char* flag_file
     for(z=0; z<nz_; z++)
         for(y=0; y<ny_; y++)
             for(x=0; x<nx_; x++){
-                k = GID(z, y, x);
-                if(flag[k] == 0){ //fluid nodes
+                k = GID_(z, y, x);
+                if(flag[k] == 1){ //fluid nodes
                     node_info_tmp.x = x;
                     node_info_tmp.y = y;
                     node_info_tmp.z = z;
@@ -137,15 +139,15 @@ V_DESC build_V(unsigned short num_p_, int nx_, int ny_, int nz_, char* flag_file
                         yp = (y + e[i+1][1] + ny_)%(ny_);  //periodical
                         zp = (z + e[i+1][2] + nz_)%(nz_);  //periodical
                         //end Optimize
-                        kp = GID(zp, yp, xp);
-                        if(flag[kp] == 1) //previous node is solid node
+                        kp = GID_(zp, yp, xp);
+                        if(flag[kp] == 0) //previous node is solid node
                             node_info_tmp.nb_info[i].node_type = TYPE_SOLID;
                         else{
                             np = X_to_n[kp]; //previous node's fluid gid
                             pp = index_node[np].pid; //previous node's pid
                             node_info_tmp.nb_info[i].node_id = index_node[np].pos_in_p;
                             node_info_tmp.nb_info[i].node_pid = pp;
-                            node_info_tmp.nb_info[i].node_type=(pp == p)?TYPE_FLUID:TYPE_EXTERN_FLUID;
+                            node_info_tmp.nb_info[i].node_type=(pp == p)?TYPE_FLUID:TYPE_EXTERN;
                         }
                     }
                     //flishing build temp node_info, then insert to the appropriate V array
@@ -185,5 +187,18 @@ void save_V(V_DESC *v_desc_, char* file_name_)
         fclose(fp);
         exit(-1);
     }
+    printf("V.bin written %ld Bytes\n", v_desc_->num_node*sizeof(NODE_INFO));
+    printf("NODE_INFO_size: %ld Bytes\n", sizeof(NODE_INFO));
     fclose(fp);
+}
+
+int main(int argc, char* argv[])
+{
+    if(argc !=2) {fprintf(stderr, "Error, usage: ./preprocess.x np\n"); exit(-1);};
+    int num_p = atoi(argv[1]);
+    V_DESC v_desc;
+    v_desc = build_V(num_p, 400,400,400, "flag.bin");
+    save_V(&v_desc, "V.bin");
+    free_v_desc(&v_desc);
+    return 0;
 }
