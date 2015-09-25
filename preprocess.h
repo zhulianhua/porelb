@@ -3,7 +3,6 @@
 
 
 #include "porelb.h"
-#include "lb.h"
 
 #define GID_(z,y,x) (((z*ny_+y)*nx_ + x))
 
