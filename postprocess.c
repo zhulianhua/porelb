@@ -39,6 +39,51 @@ void output_slice_X(int n)
     }
 }
 
+void output_slice_Y(int n)
+{
+    FILE* fp;
+    char filename[100];
+    for(int it = 0; it<nt; it++)
+    {
+        sprintf(filename, "Slice_Y_%07d.dat", time_list[it]);
+        fp = fopen(filename, "w");
+        fprintf(fp, "TITLE = \" Y slice at %04d\"\n", n);
+        fprintf(fp, "Variables = \"X\", \"Y\", \"Rho\", \"Ux\", \"Uy\", \"Uz\", \"flag\"\n");
+        fprintf(fp, "ZONE I = %4d, J = %4d, F=POINT\n", nz, nx);
+        for(int k=0; k<nz; k++)
+            for(int i=0; i<nx; i++)
+            {
+                long int loc = k*nx*ny + n*nx + i;
+                fprintf(fp,  "%f %f % 21.14e  % 21.14E  % 21.14E  % 21.14E  % 8.1e\n" ,
+                        Z[loc], X[loc], rho[loc], u[loc],  v[loc],   w[loc],   (int)flag[loc]);
+            }
+
+        fclose(fp);
+    }
+}
+
+void output_slice_Z(int n)
+{
+    FILE* fp;
+    char filename[100];
+    for(int it = 0; it<nt; it++)
+    {
+        sprintf(filename, "Slice_Z_%07d.dat", time_list[it]);
+        fp = fopen(filename, "w");
+        fprintf(fp, "TITLE = \" Y slice at %04d\"\n", n);
+        fprintf(fp, "Variables = \"X\", \"Y\", \"Rho\", \"Ux\", \"Uy\", \"Uz\", \"flag\"\n");
+        fprintf(fp, "ZONE I = %4d, J = %4d, F=POINT\n", nz, nx);
+        for(int j=0; j<ny; j++)
+            for(int i=0; i<nx; i++)
+            {
+                long int loc = n*nx*ny + j*nx + i;
+                fprintf(fp,  "%f %f % 21.14e  % 21.14E  % 21.14E  % 21.14E  % 8.1e\n" ,
+                        Y[loc], X[loc], rho[loc], u[loc],  v[loc],   w[loc],   (int)flag[loc]);
+            }
+        fclose(fp);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     int num_p, num_f;
@@ -238,6 +283,14 @@ int main(int argc, char* argv[])
         else if (!strcmp(argv[1], "X"))
         {
             output_slice_X(n_slice);
+        }
+        else if (!strcmp(argv[1], "Y"))
+        {
+            output_slice_Y(n_slice);
+        }
+        else if (!strcmp(argv[1], "Z"))
+        {
+            output_slice_Z(n_slice);
         }
         else
         {

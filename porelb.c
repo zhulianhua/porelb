@@ -89,8 +89,9 @@ void init_para(SIMULATION* sim_)
     sim_->omega = 1.0/sim_->tau;
     sim_->nu = 1.0/3.0*(sim_->tau - 0.5);
     sim_->Xlength = sim_->nx;
-    sim_->Xforce = 0.0e-0;
-    sim_->it_print = 1;
+    sim_->Xforce = 1.0e-5;
+    sim_->it_print = 10000;
+    sim_->it_save_data = 10000;
 }
 
 void free_memory(SIMULATION *sim_)
@@ -219,11 +220,6 @@ void build_send_recv_info(SIMULATION *sim_)
         }
     }
 
-    /*if(!sim_->pid)*/
-    /*{*/
-        /*printf("0 >>> Recv_info[0], nid = %d, j = %d\n", sim_->Recv_info[0], sim_->Recv_info[1]);*/
-    /*}*/
-
     for(int i=0; i<count; i++)
     {
         sim_->Send_info[2*i  ] = links[i].own_nid;
@@ -257,11 +253,6 @@ void update_send_dist(SIMULATION* sim_)
         j   = sim_->Send_info[2*i+1];
         sim_->Send_Dist[i] = sim_->f0[nid*Q+j];
     }
-    /*if(sim_->pid)*/
-    /*{*/
-        /*printf("1 >>> Send_Dist[1] = %21.13e,j = %d\n", sim_->Send_Dist[1], j);*/
-    /*}*/
-    //check
 }
 
 void send_recv(SIMULATION* sim_)
@@ -316,18 +307,13 @@ void stream_inner_nodes(SIMULATION* sim_)
 
 void update_recv_dist(SIMULATION* sim_)
 {
-    //Pack from Recv_Dist
+    //Unpack from Recv_Dist
     int nid, j;
     for(int i=0; i<sim_->N_c; i++)
     {
         nid = sim_->Recv_info[2*i];
         j   = sim_->Recv_info[2*i+1];
         sim_->f1[nid*Q+j] = sim_->Recv_Dist[i];
-        /*if(fabs(sim_->Recv_Dist[i] - tp[j]) > 1e-8) {*/
-            /*fprintf(stderr, "Error in Recv_dist\n");*/
-            /*fprintf(stderr, "%d >>> Recv_Dist[%d] = %21.13e, tp[%d] = %21.13e\n", sim_->pid, i, sim_->Recv_Dist[i], j, tp[j]);*/
-            /*exit(-9);*/
-        /*}*/
     }
 }
 
@@ -384,8 +370,7 @@ void collision(SIMULATION* sim_)
         for(int j=0; j<Q; j++)
         {
             sim_->f0[i*Q+j] = (1.0-omega)*sim_->f1[i*Q+j]
-                + ( omega + (1.0-0.5*omega)*3.0*(e[j][0] - u)*sim_->Xforce )
-                *feq(j,rho,u, v, w);
+                + ( omega + (1.0-0.5*omega)*3.0*(e[j][0] - u)*sim_->Xforce )*feq(j,rho,u, v, w);
         }
     }
 }
@@ -459,6 +444,7 @@ int main(int argc, char* argv[])
         update_recv_dist(&sim);
         collision(&sim);
         if(!sim.pid) printf(">>> Step : %20d \n", sim.it);
+        if(sim.it % sim.it_save_data == 0) save_data(&sim);
     }
     t2 = MPI_Wtime(); 
     if(!sim.pid)printf( "Elapsed time is %f\n", t2 - t1 ); 
