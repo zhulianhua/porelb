@@ -88,9 +88,9 @@ void init_para(SIMULATION* sim_)
     sim_->omega = 1.0/sim_->tau;
     sim_->nu = 1.0/3.0*(sim_->tau - 0.5);
     sim_->Xlength = sim_->nx;
-    sim_->Xforce = 1.0e-5;
+    sim_->Xforce = 1.0e-3;
     sim_->it_print = 10000;
-    sim_->it_save_data = 10000;
+    sim_->it_save_data = 1000;
 }
 
 void free_memory(SIMULATION *sim_)
@@ -200,11 +200,6 @@ void build_send_recv_info(SIMULATION *sim_)
         sim_->Send_info[2*i+1] = links[i].j;
     }
 
-    /*if(sim_->pid)*/
-    /*{*/
-        /*printf("1 >>> Send_info[0], nid = %d, j = %d\n", sim_->Send_info[0], sim_->Send_info[1]);*/
-    /*}*/
-
     int start = 0;
     MPI_Status status;
     for(int i=0; i<sim_->num_p; i++)
@@ -296,8 +291,8 @@ void stream_inner_nodes(SIMULATION* sim_)
         for(int j=1; j<Q; j++)
         {
             if(sim_->V[i].nb_info[j-1].node_type == TYPE_FLUID)
-                sim_->f1[i*Q+j] = 
-                    sim_->f0[sim_->V[i].nb_info[j-1].node_id*Q+j]; //normal streaming
+                sim_->f1[sim_->V[i].nb_info[j-1].node_id*Q+j] = 
+                    sim_->f0[i*Q+j]; //normal streaming
             else if(sim_->V[i].nb_info[j-1].node_type == TYPE_SOLID)
                 sim_->f1[i*Q+j] = sim_->f0[i*Q+re[j]]; //bounce back
         }
@@ -310,7 +305,7 @@ void update_recv_dist(SIMULATION* sim_)
     int nid, j;
     for(int i=0; i<sim_->N_c; i++)
     {
-        nid = sim_->Recv_info[2*i];
+        nid = sim_->Recv_info[2*i  ];
         j   = sim_->Recv_info[2*i+1];
         sim_->f1[nid*Q+j] = sim_->Recv_Dist[i];
     }
@@ -318,11 +313,6 @@ void update_recv_dist(SIMULATION* sim_)
 
 void check_recv_dist(SIMULATION* sim_)
 {
-    for(int i=0; i<sim_->N_c; i++)
-    {
-        printf("N_c = %8d, f = %21.13e\n", i, sim_->Recv_Dist[i]);
-        if(sim_->Recv_Dist[i] < 1e-5) {fprintf(stderr, "Err in recv_dist\n"); exit(-8);}
-    }
 }
 
 void collision(SIMULATION* sim_)
