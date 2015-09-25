@@ -2,7 +2,6 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include "porelb.h"
-#include "lb.h"
 
 double feq(int k, double rho, double u, double v, double w)
 {
