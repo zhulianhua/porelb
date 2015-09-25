@@ -21,22 +21,22 @@ make
 To run
 
 1. pre-process  : 
-```
-./preprocess 40
-``` 
-where 40 is the number of MPI process
+    ```
+    ./preprocess 40
+    ``` 
+    where 40 is the number of MPI process
 
 2. solver       : 
-```
-mpirun -np 40 -machinefile ~/hosts` ./porelb.x 100000
-```
-where 100000 is the total LB steps
+    ```
+    mpirun -np 40 -machinefile ~/hosts` ./porelb.x 100000
+    ```
+    where 100000 is the total LB steps
 
 3. post-process : 
-```
-./postprocess A 1000 2000 3000
-```
- Save the full flow data at time step 1000 2000 and 3000.  Or 
-```./postprocess X 200 1000 2000 3000
-```
-to slide out the slice X=200
+    ```
+    ./postprocess A 1000 2000 3000
+    ```
+    Save the full flow data at time step 1000 2000 and 3000.  Or 
+    ```./postprocess X 200 1000 2000 3000
+    ```
+    to slide out the slice X=200
