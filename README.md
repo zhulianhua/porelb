@@ -28,7 +28,7 @@ To run
 
 2. solver       : 
     ```
-    mpirun -np 40 -machinefile ~/hosts` ./porelb.x 100000
+    mpirun -np 40 -machinefile ~/hosts ./porelb.x 100000
     ```
     where 100000 is the total LB steps
 
