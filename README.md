@@ -2,7 +2,7 @@
 
 #### Introduction
 
-This solver implements the idea in "A high-performance lattice Boltzmann implementation to model flow in porous media, Computer Physics Communications 158 (2004) 89–105" to simulate flow in porous media.
+This solver implements the idea in **A high-performance lattice Boltzmann implementation to model flow in porous media, Computer Physics Communications 158 (2004) 89–105** to simulate flow in porous media.
 
 It uses a sparse lattice representation for the pores part of the porous matrix.
 Combined with the Orthogonal recursive bisection domain decomposition,
@@ -22,7 +22,7 @@ To run
 
 1. pre-process  : 
     ```
-    ./preprocess 40
+    ./preprocess.x 40
     ``` 
     where 40 is the number of MPI process
 
@@ -34,9 +34,10 @@ To run
 
 3. post-process : 
     ```
-    ./postprocess A 1000 2000 3000
+    ./postprocess.x A 1000 2000 3000
     ```
     Save the full flow data at time step 1000 2000 and 3000.  Or 
-    ```./postprocess X 200 1000 2000 3000
+    ```
+    ./postprocess.x X 200 1000 2000 3000
     ```
     to slide out the slice X=200
