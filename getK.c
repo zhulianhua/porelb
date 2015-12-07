@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
     if(argc !=3)
     {
         fprintf(stderr, "argc err\n");
+        printf("Usage: ./testpre Chi nx\n")
+        printf("0<Chi<1 controls the size of the sphere, and nx is the resolution\n")
         exit(-1);
     }
     Chi = atof(argv[1]);
